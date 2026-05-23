@@ -319,7 +319,7 @@ async function doTodaySearch(){
   await doSearch('Find the most recent corruption cases and scandals reported in news today or this week in 2026. Include any breaking news about political corruption, scams, fraud arrests, or investigation updates.');
 }
 
-async function doSearch(customPrompt){
+async function doSearch(customPrompt) {
   hideError();
   setLoading(true);
   document.getElementById('results-div').style.display = 'none';
@@ -329,39 +329,27 @@ async function doSearch(customPrompt){
   const kw = document.getElementById('kw-input').value.trim();
   const fy = document.getElementById('from-yr').value;
   const ty = document.getElementById('to-yr').value;
+  
   document.getElementById('loading-sub').textContent = country + ' · ' + fy + '–' + ty + (kw ? ' · ' + kw : '');
 
-  let mi = 0;
-  const mt = setInterval(()=>{ mi=(mi+1)%LOADING_MSGS.length; document.getElementById('loading-msg').textContent=LOADING_MSGS[mi]; }, 2000);
+  // Agar aap local chala rahe hain toh localhost use hoga, nahi toh Render ka live URL
+  const hostname = window.location.hostname;
+  const isLocalHost = hostname === 'localhost' || hostname === '127.0.0.1';
+  
+  const API_BASE = isLocalHost 
+    ? 'http://localhost:8000' 
+    : 'https://corruption-api-os.onrender.com'; // Render par deploy karne ke baad mila URL yahan dalein
 
-  const userPrompt = customPrompt || `Find real, well-documented corruption cases${country!=='All Countries'?' in '+country:' globally'} from ${fy} to ${ty}${kw?'. Focus specifically on: '+kw:''}. Use web search to find comprehensive, current information from news outlets, court records, and official investigations. Include all direct and indirect political party connections, NGO involvements, government officials named, and affected communities.`;
+  const url = `${API_BASE}/api/v1/corruption/search?country=${encodeURIComponent(country)}&keyword=${encodeURIComponent(kw)}&from_year=${fy}&to_year=${ty}`;
 
-  const sysPrompt = `You are a corruption intelligence analyst. Use web search to find real, publicly reported corruption cases. Return ONLY valid JSON starting with { and ending with } (no markdown, no code fences, no preamble). Use exactly this schema:
-{"cases":[{"id":"c1","title":"Full descriptive title","year":2024,"country":"India","amount":"₹1,76,000 crore or Undisclosed","parties_connected":["Party1","Party2"],"ngos_connected":["Foundation Name"],"individuals":["Full Name 1"],"description":"2-3 factual sentences from news reports.","status":"Under Investigation","type":"Telecom Fraud","severity":"High","connection":"Direct","source_hint":"CBI, Supreme Court, Reuters"}],"meta":{"total_found":10,"period_covered":"1947-2026","top_entities":["INC","BJP"],"estimated_total_value":"₹X lakh crore"}}
-Include 8-15 significant real cases. Severity: High=nationally significant, Medium=regionally significant, Low=smaller. Be factual and sourced.`;
-
-  try{
-    const res = await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:4000,
-        system:sysPrompt,
-        messages:[{role:'user',content:userPrompt}],
-        tools:[{type:'web_search_20250305',name:'web_search'}]
-      })
-    });
-    clearInterval(mt);
-    if(!res.ok) throw new Error('API error '+res.status+'. Please try again.');
+  try {
+    const res = await fetch(url, { method: 'GET' });
+    if (!res.ok) throw new Error('OS Engine connection failure: Status ' + res.status);
+    
     const data = await res.json();
-    const text = (data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
-    const m = text.match(/\{[\s\S]*\}/);
-    if(!m) throw new Error('Could not parse response. Please try again.');
-    renderResults(JSON.parse(m[0]));
-  } catch(e){
-    clearInterval(mt);
-    showError(e.message || 'Search failed. Please try again.');
+    renderResults(data);
+  } catch(e) {
+    showError(e.message || 'Real-time database sync failure.');
     document.getElementById('empty-div').style.display = lastResults ? 'none' : 'block';
   }
   setLoading(false);
