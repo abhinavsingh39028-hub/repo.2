@@ -1,0 +1,369 @@
+
+<style>
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
+.case-card{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);background:var(--color-background-primary);padding:1rem 1.25rem;cursor:pointer;transition:border-color .15s}
+.case-card:hover{border-color:var(--color-border-secondary)}
+.stat-card{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:0.875rem 1rem}
+.badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:4px;border:0.5px solid;white-space:nowrap;font-weight:400}
+.party-btn{font-size:11px;padding:3px 10px;color:#dc2626;border:0.5px solid #dc2626;background:transparent;border-radius:4px;cursor:pointer}
+.party-btn:hover{background:rgba(220,38,38,0.07)}
+.preset-btn{font-size:11px;padding:4px 10px;border-radius:4px;cursor:pointer;opacity:.65;border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary)}
+.preset-btn:hover{opacity:1;background:var(--color-background-secondary)}
+.preset-btn.active{opacity:1;background:var(--color-background-secondary)}
+.deep-btn{font-size:12px;padding:6px 14px;border-radius:var(--border-radius-md);cursor:pointer;background:transparent;border:0.5px solid var(--color-border-secondary);color:var(--color-text-primary)}
+.deep-btn:hover{background:var(--color-background-secondary)}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;border-radius:10px;border:0.5px solid;white-space:nowrap}
+.info-panel{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:.75rem 1rem;font-size:11px;color:var(--color-text-tertiary);line-height:1.6}
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#dc2626;animation:blink 1.2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.expand-section{margin-top:14px;border-top:0.5px solid var(--color-border-tertiary);padding-top:14px}
+.section-label{font-size:10px;font-weight:500;color:var(--color-text-tertiary);letter-spacing:.07em;margin-bottom:6px;text-transform:uppercase}
+.today-btn{font-size:12px;padding:5px 14px;border-radius:var(--border-radius-md);cursor:pointer;background:var(--color-background-danger);color:var(--color-text-danger);border:0.5px solid var(--color-border-danger);font-weight:500}
+.today-btn:hover{opacity:.85}
+input[type=range]{flex:1}
+select,input[type=text]{width:100%;box-sizing:border-box}
+</style>
+
+<h2 class="sr-only">Corruption Intelligence Dashboard — AI-powered search of publicly reported corruption cases across political parties, NGOs and communities</h2>
+
+<div style="padding:1rem 0">
+
+  <!-- Header -->
+  <div style="margin-bottom:18px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap">
+      <i class="ti ti-shield-exclamation" aria-hidden="true" style="font-size:20px;color:var(--color-text-primary)"></i>
+      <span style="font-size:18px;font-weight:500">Corruption Intelligence</span>
+      <span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:500;padding:2px 9px;border-radius:4px;background:var(--color-background-danger);color:var(--color-text-danger);border:0.5px solid var(--color-border-danger)">
+        <span class="dot"></span> LIVE · AI-POWERED
+      </span>
+    </div>
+    <p style="font-size:12px;color:var(--color-text-tertiary);margin:0;line-height:1.55">
+      Surfaces corruption cases from news archives, court records &amp; official investigations via real-time web search. Shows publicly reported political party, NGO, and community links. Not a government database — reflects reported information only.
+    </p>
+  </div>
+
+  <!-- Search Panel -->
+  <div style="border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);background:var(--color-background-secondary);padding:1.25rem;margin-bottom:16px">
+
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;margin-bottom:14px">
+      <div>
+        <label style="font-size:10px;font-weight:500;color:var(--color-text-tertiary);letter-spacing:.06em;display:block;margin-bottom:6px">COUNTRY / REGION</label>
+        <select id="country-sel">
+          <option>India</option>
+          <option>United States</option>
+          <option>United Kingdom</option>
+          <option>Brazil</option>
+          <option>China</option>
+          <option>Russia</option>
+          <option>Nigeria</option>
+          <option>Pakistan</option>
+          <option>Bangladesh</option>
+          <option>Indonesia</option>
+          <option>Turkey</option>
+          <option>Mexico</option>
+          <option>Ukraine</option>
+          <option>South Africa</option>
+          <option>All Countries</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:10px;font-weight:500;color:var(--color-text-tertiary);letter-spacing:.06em;display:block;margin-bottom:6px">KEYWORD / CASE NAME</label>
+        <input type="text" id="kw-input" placeholder="e.g. 2G Spectrum, Defence Deals..." onkeydown="if(event.key==='Enter')doSearch()">
+      </div>
+    </div>
+
+    <div style="margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+        <span style="font-size:10px;font-weight:500;color:var(--color-text-tertiary);letter-spacing:.06em">YEAR RANGE</span>
+        <span id="yr-label" style="font-family:var(--font-mono);font-size:12px;color:var(--color-text-secondary)">1947 — 2026</span>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <span style="font-size:11px;color:var(--color-text-tertiary)">1947</span>
+        <input type="range" id="from-yr" min="1947" max="2025" value="1947" step="1" oninput="updateYrLabel()">
+        <input type="range" id="to-yr" min="1948" max="2026" value="2026" step="1" oninput="updateYrLabel()">
+        <span style="font-size:11px;color:var(--color-text-tertiary)">2026</span>
+      </div>
+    </div>
+
+    <div style="margin-bottom:14px">
+      <div style="font-size:10px;font-weight:500;color:var(--color-text-tertiary);letter-spacing:.06em;margin-bottom:8px">QUICK SELECT (INDIA)</div>
+      <div id="preset-btns" style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="preset-btn" onclick="setPreset(this,'2G Spectrum Scam')">2G Spectrum</button>
+        <button class="preset-btn" onclick="setPreset(this,'Coalgate Coal Allocation Scam')">Coalgate</button>
+        <button class="preset-btn" onclick="setPreset(this,'Electoral Bonds')">Electoral Bonds</button>
+        <button class="preset-btn" onclick="setPreset(this,'Defence kickbacks Bofors Kargil')">Defence Deals</button>
+        <button class="preset-btn" onclick="setPreset(this,'Bank NPA fraud PMLA money laundering')">Bank Fraud</button>
+        <button class="preset-btn" onclick="setPreset(this,'Land acquisition scam benami property')">Land Scams</button>
+        <button class="preset-btn" onclick="setPreset(this,'MGNREGA PDS ration card corruption')">Welfare Theft</button>
+        <button class="preset-btn" onclick="setPreset(this,'Hawala network funding political parties')">Hawala</button>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <button onclick="doSearch()" id="search-btn" style="flex:1;min-width:200px;padding:9px 24px;font-size:14px;font-weight:500;cursor:pointer">
+        Search Corruption Database ↗
+      </button>
+      <button class="today-btn" onclick="doTodaySearch()">
+        <i class="ti ti-news" aria-hidden="true" style="font-size:14px;vertical-align:-2px;margin-right:4px"></i>Today's Headlines
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div id="loading-div" style="display:none;padding:2.5rem;text-align:center">
+    <div id="loading-msg" style="font-size:14px;color:var(--color-text-secondary);margin-bottom:8px">Scanning news archives...</div>
+    <div id="loading-sub" style="font-family:var(--font-mono);font-size:11px;color:var(--color-text-tertiary)"></div>
+  </div>
+
+  <!-- Error -->
+  <div id="error-div" style="display:none;background:var(--color-background-danger);color:var(--color-text-danger);border:0.5px solid var(--color-border-danger);border-radius:var(--border-radius-md);padding:1rem 1.25rem;font-size:13px;margin-bottom:12px">
+    <i class="ti ti-alert-circle" aria-hidden="true" style="margin-right:6px;font-size:16px;vertical-align:-2px"></i>
+    <span id="error-msg"></span>
+  </div>
+
+  <!-- Results -->
+  <div id="results-div" style="display:none">
+    <!-- Stats -->
+    <div id="stats-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px"></div>
+
+    <!-- Party network -->
+    <div id="party-panel" style="display:none;margin-bottom:14px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:.875rem 1rem">
+      <div class="section-label">Political entities connected across all cases</div>
+      <div id="party-chips" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px"></div>
+    </div>
+
+    <!-- Cases -->
+    <div id="cases-list" style="display:flex;flex-direction:column;gap:10px"></div>
+
+    <!-- Disclaimer footer -->
+    <div class="info-panel" style="margin-top:16px">
+      <i class="ti ti-info-circle" aria-hidden="true" style="margin-right:4px;font-size:13px;vertical-align:-2px"></i>
+      All data sourced from publicly available news reports, court records, and official investigation documents. Connections shown are reported associations only — not legal determinations of guilt. For official or legal purposes, consult primary sources directly. This tool is for research and awareness only.
+    </div>
+  </div>
+
+  <!-- Empty state -->
+  <div id="empty-div" style="text-align:center;padding:3rem 1rem;color:var(--color-text-secondary)">
+    <i class="ti ti-database-search" aria-hidden="true" style="font-size:36px;color:var(--color-text-tertiary);margin-bottom:12px;display:block"></i>
+    <div style="font-size:14px;margin-bottom:8px;font-weight:500">Select filters and search the database</div>
+    <div style="font-size:12px;color:var(--color-text-tertiary)">Powered by real-time web search · Sources: news archives, court records, official investigations</div>
+  </div>
+
+</div>
+
+<script>
+let expandedId = null;
+let lastResults = null;
+const LOADING_MSGS = [
+  "Scanning news archives...",
+  "Querying court records...",
+  "Cross-referencing party data...",
+  "Mapping organizational links...",
+  "Compiling intelligence report..."
+];
+
+function updateYrLabel(){
+  const f = document.getElementById('from-yr').value;
+  const t = document.getElementById('to-yr').value;
+  document.getElementById('yr-label').textContent = f + ' — ' + t;
+}
+
+function setPreset(btn, val){
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('kw-input').value = val;
+}
+
+function setLoading(on){
+  document.getElementById('loading-div').style.display = on ? 'block' : 'none';
+  document.getElementById('empty-div').style.display = on ? 'none' : (lastResults ? 'none' : 'block');
+  document.getElementById('search-btn').disabled = on;
+  document.getElementById('search-btn').textContent = on ? 'Searching...' : 'Search Corruption Database ↗';
+}
+
+function showError(msg){
+  const d = document.getElementById('error-div');
+  d.style.display = 'block';
+  document.getElementById('error-msg').textContent = msg;
+}
+
+function hideError(){
+  document.getElementById('error-div').style.display = 'none';
+}
+
+function sevColor(s){ return {High:'#dc2626',Medium:'#d97706',Low:'#5f7b8f'}[s] || '#5f7b8f'; }
+function statusColor(s=''){
+  const l = s.toLowerCase();
+  if(l.includes('convict')) return '#16a34a';
+  if(l.includes('acquit')) return '#64748b';
+  return '#d97706';
+}
+
+function renderResults(data){
+  lastResults = data;
+  document.getElementById('results-div').style.display = 'block';
+  document.getElementById('empty-div').style.display = 'none';
+
+  const cases = data.cases || [];
+  const meta = data.meta || {};
+
+  // Stats
+  const highCount = cases.filter(c=>c.severity==='High').length;
+  const sg = document.getElementById('stats-grid');
+  sg.innerHTML = `
+    <div class="stat-card">
+      <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:6px">Cases Found</div>
+      <div style="font-size:22px;font-weight:500;font-family:var(--font-mono)">${cases.length}</div>
+    </div>
+    <div class="stat-card">
+      <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:6px">High Severity</div>
+      <div style="font-size:22px;font-weight:500;font-family:var(--font-mono);color:#dc2626">${highCount}</div>
+    </div>
+    <div class="stat-card">
+      <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:6px">Est. Total Value</div>
+      <div style="font-size:14px;font-weight:500;font-family:var(--font-mono)">${meta.estimated_total_value || '—'}</div>
+    </div>
+    <div class="stat-card">
+      <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:6px">Period Covered</div>
+      <div style="font-size:13px;font-weight:500;font-family:var(--font-mono)">${meta.period_covered || '—'}</div>
+    </div>
+  `;
+
+  // Party panel
+  const allParties = [...new Set(cases.flatMap(c=>c.parties_connected||[]))];
+  const pp = document.getElementById('party-panel');
+  if(allParties.length > 0){
+    pp.style.display = 'block';
+    document.getElementById('party-chips').innerHTML = allParties.map(p=>`
+      <button class="party-btn" onclick="drillParty('${p.replace(/'/g,"\\'")}')">
+        <i class="ti ti-building-bank" aria-hidden="true" style="font-size:12px;vertical-align:-1px;margin-right:3px"></i>${p} ↗
+      </button>
+    `).join('');
+  } else { pp.style.display = 'none'; }
+
+  // Cases
+  const cl = document.getElementById('cases-list');
+  cl.innerHTML = cases.map(c => caseCard(c)).join('');
+}
+
+function caseCard(c){
+  const sc = sevColor(c.severity);
+  const stc = statusColor(c.status);
+  const badges = [
+    c.type ? `<span class="badge" style="color:var(--color-text-secondary);border-color:var(--color-border-secondary)">${c.type}</span>` : '',
+    c.status ? `<span class="badge" style="color:${stc};border-color:${stc}">${c.status}</span>` : '',
+    c.country ? `<span class="badge" style="color:var(--color-text-tertiary);border-color:var(--color-border-tertiary)">${c.country}</span>` : '',
+    c.connection ? `<span class="badge" style="color:var(--color-text-tertiary);border-color:var(--color-border-tertiary)">${c.connection} link</span>` : ''
+  ].filter(Boolean).join('');
+
+  const partyChips = (c.parties_connected||[]).map(p=>`<span class="chip" style="color:#dc2626;border-color:#dc2626;background:rgba(220,38,38,0.06)">${p}</span>`).join('');
+  const ngoChips = (c.ngos_connected||[]).map(n=>`<span class="chip" style="color:#d97706;border-color:#d97706;background:rgba(217,119,6,0.06)">${n}</span>`).join('');
+  const indivChips = (c.individuals||[]).map(i=>`<span class="chip" style="color:var(--color-text-secondary);border-color:var(--color-border-secondary)">${i}</span>`).join('');
+  
+  const amountHtml = (c.amount && c.amount!=='Undisclosed') ? 
+    `<div style="font-family:var(--font-mono);font-size:12px;color:#dc2626;margin-top:6px"><i class="ti ti-alert-triangle" aria-hidden="true" style="font-size:13px;vertical-align:-2px;margin-right:3px"></i>${c.amount}</div>` : '';
+
+  const expandedContent = `
+    <div class="expand-section">
+      <p style="font-size:13px;line-height:1.65;color:var(--color-text-secondary);margin-bottom:14px">${c.description||''}</p>
+      ${partyChips ? `<div class="section-label">Political party connections</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">${partyChips}</div>` : ''}
+      ${ngoChips ? `<div class="section-label">NGO / community links</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">${ngoChips}</div>` : ''}
+      ${indivChips ? `<div class="section-label">Named individuals</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">${indivChips}</div>` : ''}
+      ${c.source_hint ? `<div style="font-size:11px;color:var(--color-text-tertiary);margin-top:4px;margin-bottom:10px">Source basis: ${c.source_hint}</div>` : ''}
+      <button class="deep-btn" onclick="event.stopPropagation();sendPrompt('Give me a comprehensive investigation report on: ${(c.title||'').replace(/'/g,"\\'")}. Include all known parties, money trail, investigation agencies, court proceedings, timeline, and current 2026 status.')">
+        Full Investigation Report ↗
+      </button>
+    </div>`;
+
+  return `<div class="case-card" id="card-${c.id}" style="border-left:3px solid ${sc}" onclick="toggleCard('${c.id}')">
+    <div style="display:flex;justify-content:space-between;gap:12px;margin-bottom:8px">
+      <div style="font-size:14px;font-weight:500;line-height:1.4;flex:1">${c.title||'Untitled'}</div>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+        <span style="font-family:var(--font-mono);font-size:12px;color:var(--color-text-secondary)">${c.year||''}</span>
+        <i class="ti ti-chevron-down" aria-hidden="true" id="ico-${c.id}" style="font-size:16px;color:var(--color-text-tertiary)"></i>
+      </div>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">${badges}</div>
+    ${amountHtml}
+    <div id="exp-${c.id}" style="display:none">${expandedContent}</div>
+  </div>`;
+}
+
+function toggleCard(id){
+  const exp = document.getElementById('exp-'+id);
+  const ico = document.getElementById('ico-'+id);
+  if(!exp) return;
+  if(expandedId && expandedId !== id){
+    const prev = document.getElementById('exp-'+expandedId);
+    const pi = document.getElementById('ico-'+expandedId);
+    if(prev) prev.style.display = 'none';
+    if(pi){ pi.classList.remove('ti-chevron-up'); pi.classList.add('ti-chevron-down'); }
+  }
+  const open = exp.style.display === 'block';
+  exp.style.display = open ? 'none' : 'block';
+  ico.classList.toggle('ti-chevron-up', !open);
+  ico.classList.toggle('ti-chevron-down', open);
+  expandedId = open ? null : id;
+}
+
+function drillParty(party){
+  document.getElementById('kw-input').value = party;
+  doSearch();
+}
+
+async function doTodaySearch(){
+  document.getElementById('kw-input').value = 'corruption scandal today 2026';
+  document.getElementById('from-yr').value = 2025;
+  document.getElementById('to-yr').value = 2026;
+  updateYrLabel();
+  await doSearch('Find the most recent corruption cases and scandals reported in news today or this week in 2026. Include any breaking news about political corruption, scams, fraud arrests, or investigation updates.');
+}
+
+async function doSearch(customPrompt){
+  hideError();
+  setLoading(true);
+  document.getElementById('results-div').style.display = 'none';
+  expandedId = null;
+
+  const country = document.getElementById('country-sel').value;
+  const kw = document.getElementById('kw-input').value.trim();
+  const fy = document.getElementById('from-yr').value;
+  const ty = document.getElementById('to-yr').value;
+  document.getElementById('loading-sub').textContent = country + ' · ' + fy + '–' + ty + (kw ? ' · ' + kw : '');
+
+  let mi = 0;
+  const mt = setInterval(()=>{ mi=(mi+1)%LOADING_MSGS.length; document.getElementById('loading-msg').textContent=LOADING_MSGS[mi]; }, 2000);
+
+  const userPrompt = customPrompt || `Find real, well-documented corruption cases${country!=='All Countries'?' in '+country:' globally'} from ${fy} to ${ty}${kw?'. Focus specifically on: '+kw:''}. Use web search to find comprehensive, current information from news outlets, court records, and official investigations. Include all direct and indirect political party connections, NGO involvements, government officials named, and affected communities.`;
+
+  const sysPrompt = `You are a corruption intelligence analyst. Use web search to find real, publicly reported corruption cases. Return ONLY valid JSON starting with { and ending with } (no markdown, no code fences, no preamble). Use exactly this schema:
+{"cases":[{"id":"c1","title":"Full descriptive title","year":2024,"country":"India","amount":"₹1,76,000 crore or Undisclosed","parties_connected":["Party1","Party2"],"ngos_connected":["Foundation Name"],"individuals":["Full Name 1"],"description":"2-3 factual sentences from news reports.","status":"Under Investigation","type":"Telecom Fraud","severity":"High","connection":"Direct","source_hint":"CBI, Supreme Court, Reuters"}],"meta":{"total_found":10,"period_covered":"1947-2026","top_entities":["INC","BJP"],"estimated_total_value":"₹X lakh crore"}}
+Include 8-15 significant real cases. Severity: High=nationally significant, Medium=regionally significant, Low=smaller. Be factual and sourced.`;
+
+  try{
+    const res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:4000,
+        system:sysPrompt,
+        messages:[{role:'user',content:userPrompt}],
+        tools:[{type:'web_search_20250305',name:'web_search'}]
+      })
+    });
+    clearInterval(mt);
+    if(!res.ok) throw new Error('API error '+res.status+'. Please try again.');
+    const data = await res.json();
+    const text = (data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
+    const m = text.match(/\{[\s\S]*\}/);
+    if(!m) throw new Error('Could not parse response. Please try again.');
+    renderResults(JSON.parse(m[0]));
+  } catch(e){
+    clearInterval(mt);
+    showError(e.message || 'Search failed. Please try again.');
+    document.getElementById('empty-div').style.display = lastResults ? 'none' : 'block';
+  }
+  setLoading(false);
+}
+</script>
